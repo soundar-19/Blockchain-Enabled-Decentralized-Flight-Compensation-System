@@ -12,6 +12,23 @@ dist
 dist-ssr
 *.local
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+skyguard.db
+
 # Environment variables
 .env
 .env.local
