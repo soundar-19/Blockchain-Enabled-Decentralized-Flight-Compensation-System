@@ -1,0 +1,256 @@
+.register-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #f0f4ff, #fce7f3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.register-card-wrapper {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.register-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.register-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.register-subtitle {
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+.register-error {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  margin-bottom: 0.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 2.75rem;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af;
+  pointer-events: none;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.form-input {
+  width: 100%;
+  padding-left: 8rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  outline: none;
+  height: 100%;
+  box-sizing: border-box;
+  text-indent: 0.75rem;
+}
+
+.form-input::placeholder {
+  color: #9ca3af;
+  font-size: 0.875rem;
+  opacity: 1;
+  margin-left: 1rem;
+}
+
+.form-input:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.form-input.input-with-button {
+  padding-right: 2.5rem;
+}
+
+.form-input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.toggle-password-btn:hover:not(:disabled) {
+  color: #374151;
+}
+
+.toggle-password-btn:disabled {
+  cursor: not-allowed;
+}
+
+.password-strength-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.password-strength-bar {
+  flex: 1;
+  height: 0.375rem;
+  background: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.password-strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.password-strength-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.terms-checkbox-container {
+  margin-bottom: 1rem;
+}
+
+.terms-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.checkbox-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.submit-button {
+  padding: 0.75rem;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  margin-bottom: 1.5rem;
+}
+
+.submit-button:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.register-footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer-text {
+  color: #4b5563;
+  font-size: 0.875rem;
+}
+
+.login-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.login-link:hover:not(:disabled) {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.login-link:disabled {
+  cursor: not-allowed;
+}

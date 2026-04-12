@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blockchain Flight Compensation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a1a;
+    --bg2: #080f20;
+    --neon-blue: #00d4ff;
+    --neon-cyan: #00fff5;
+    --neon-green: #00ff9d;
+    --neon-purple: #b060ff;
+    --neon-orange: #ff9500;
+    --neon-red: #ff4060;
+    --gold: #ffd700;
+    --panel: rgba(0,212,255,0.05);
+    --border: rgba(0,212,255,0.25);
+    --text: #c8e8ff;
+    --dim: rgba(200,232,255,0.5);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Exo 2', sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fadeDown 0.8s ease both;
+  }
+  .header .badge {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--neon-cyan);
+    border: 1px solid var(--neon-cyan);
+    padding: 5px 16px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(22px, 4vw, 42px);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 40px rgba(0,212,255,0.6);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .header h1 span { color: var(--neon-blue); }
+  .header p {
+    font-size: 14px;
+    color: var(--dim);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 2px;
+  }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--neon-blue);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--neon-blue), transparent);
+  }
+
+  /* LAYER BOXES */
+  .layers-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 60px;
+  }
+
+  .layer-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .layer-box {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 24px 28px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .layer-box:hover {
+    box-shadow: 0 0 30px rgba(0,212,255,0.12);
+  }
+
+  /* Layer-specific left border colors */
+  .layer-1 { border-left: 3px solid var(--neon-blue); }
+  .layer-2 { border-left: 3px solid var(--neon-purple); }
+  .layer-3 { border-left: 3px solid var(--neon-green); }
+  .layer-4 { border-left: 3px solid var(--gold); }
+  .layer-5 { border-left: 3px solid var(--neon-orange); }
+
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .layer-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .layer-1 .layer-icon { background: rgba(0,212,255,0.15); }
+  .layer-2 .layer-icon { background: rgba(176,96,255,0.15); }
+  .layer-3 .layer-icon { background: rgba(0,255,157,0.15); }
+  .layer-4 .layer-icon { background: rgba(255,215,0,0.15); }
+  .layer-5 .layer-icon { background: rgba(255,149,0,0.15); }
+
+  .layer-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .layer-1 .layer-title { color: var(--neon-blue); }
+  .layer-2 .layer-title { color: var(--neon-purple); }
+  .layer-3 .layer-title { color: var(--neon-green); }
+  .layer-4 .layer-title { color: var(--gold); }
+  .layer-5 .layer-title { color: var(--neon-orange); }
+
+  .layer-tech {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+
+  .layer-components {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .component-chip {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    border: 1px solid;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .component-chip::before {
+    content: '├';
+    margin-right: 6px;
+    opacity: 0.5;
+  }
+  .layer-1 .component-chip { border-color: rgba(0,212,255,0.3); color: rgba(0,212,255,0.8); background: rgba(0,212,255,0.06); }
+  .layer-2 .component-chip { border-color: rgba(176,96,255,0.3); color: rgba(176,96,255,0.9); background: rgba(176,96,255,0.06); }
+  .layer-3 .component-chip { border-color: rgba(0,255,157,0.3); color: rgba(0,255,157,0.8); background: rgba(0,255,157,0.06); }
+  .layer-4 .component-chip { border-color: rgba(255,215,0,0.3); color: rgba(255,215,0,0.9); background: rgba(255,215,0,0.06); }
+  .layer-5 .component-chip { border-color: rgba(255,149,0,0.3); color: rgba(255,149,0,0.9); background: rgba(255,149,0,0.06); }
+
+  /* CONNECTOR ARROW */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    gap: 2px;
+  }
+  .connector-line {
+    width: 2px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple));
+    position: relative;
+    overflow: hidden;
+  }
+  .connector-line::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, #fff, transparent);
+    animation: pulse-down 2s linear infinite;
+  }
+  .connector-arrow {
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid var(--neon-purple);
+    filter: drop-shadow(0 0 4px var(--neon-purple));
+  }
+
+  /* FLOW SECTION */
+  .flow-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+  }
+
+  .flow-card {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 28px;
+    backdrop-filter: blur(10px);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .flow-step {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--neon-cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--neon-cyan);
+    flex-shrink: 0;
+    background: rgba(0,255,245,0.08);
+  }
+  .step-vline {
+    width: 1px;
+    flex: 1;
+    min-height: 20px;
+    background: linear-gradient(180deg, rgba(0,255,245,0.3), transparent);
+    margin: 4px 0;
+  }
+  .flow-step:last-child .step-vline { display: none; }
+  .step-content {
+    padding-bottom: 20px;
+  }
+  .step-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .step-sub {
+    font-size: 11px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+  .step-sub span {
+    display: block;
+    color: var(--neon-green);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* COMPENSATION TABLE */
+  .comp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .comp-table th {
+    padding: 8px 12px;
+    text-align: left;
+    color: var(--neon-blue);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .comp-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(0,212,255,0.08);
+  }
+  .comp-table tr:hover td { background: rgba(0,212,255,0.04); }
+  .comp-table .eth { color: var(--gold); }
+  .comp-table .usd { color: var(--neon-green); }
+
+  /* TECH STACK TABLE */
+  .tech-section { margin-bottom: 60px; animation: fadeUp 0.6s ease both; }
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .tech-card {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+  }
+  .tech-card:hover {
+    border-color: rgba(0,212,255,0.5);
+    background: rgba(0,212,255,0.07);
+    transform: translateY(-2px);
+  }
+  .tech-emoji { font-size: 24px; }
+  .tech-info { flex: 1; min-width: 0; }
+  .tech-name { font-family: 'Orbitron', monospace; font-size: 11px; color: var(--neon-blue); }
+  .tech-role { font-size: 11px; color: var(--dim); margin-top: 2px; }
+  .tech-layer-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .tag-frontend { background: rgba(0,212,255,0.15); color: var(--neon-blue); border: 1px solid rgba(0,212,255,0.3); }
+  .tag-backend { background: rgba(176,96,255,0.15); color: var(--neon-purple); border: 1px solid rgba(176,96,255,0.3); }
+  .tag-db { background: rgba(0,255,157,0.15); color: var(--neon-green); border: 1px solid rgba(0,255,157,0.3); }
+  .tag-blockchain { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+  .tag-external { background: rgba(255,149,0,0.15); color: var(--neon-orange); border: 1px solid rgba(255,149,0,0.3); }
+  .tag-rpc { background: rgba(255,64,96,0.15); color: var(--neon-red); border: 1px solid rgba(255,64,96,0.3); }
+
+  /* DB SCHEMA */
+  .schema-section { margin-bottom: 60px; animation: fadeUp 0.6s ease both; }
+  .schema-box {
+    border: 1px solid rgba(0,255,157,0.3);
+    background: rgba(0,255,157,0.03);
+    padding: 24px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+  }
+  .schema-key { color: var(--neon-blue); }
+  .schema-type { color: var(--neon-orange); }
+  .schema-comment { color: var(--dim); }
+  .schema-nested { margin-left: 20px; }
+  .schema-brace { color: var(--neon-green); }
+
+  /* FULL PROCESS FLOW */
+  .full-flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 60px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .ff-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .ff-box {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .ff-box::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+  .ff-box.user::before { background: var(--neon-blue); }
+  .ff-box.backend::before { background: var(--neon-purple); }
+  .ff-box.blockchain::before { background: var(--gold); }
+  .ff-box:hover { transform: translateX(4px); }
+
+  .ff-icon { font-size: 18px; flex-shrink: 0; }
+  .ff-label { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--text); }
+  .ff-desc { font-size: 11px; color: var(--dim); }
+
+  .ff-connector {
+    display: flex;
+    justify-content: center;
+    padding: 3px 0;
+  }
+  .ff-connector-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .ff-line { width: 1px; height: 14px; background: var(--neon-blue); opacity: 0.4; }
+  .ff-arrow { font-size: 10px; color: var(--neon-blue); opacity: 0.7; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-down {
+    0% { top: -100%; }
+    100% { top: 100%; }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .layer-wrapper:nth-child(1) { animation-delay: 0.1s; }
+  .layer-wrapper:nth-child(2) { animation-delay: 0.2s; }
+  .layer-wrapper:nth-child(3) { animation-delay: 0.3s; }
+  .layer-wrapper:nth-child(4) { animation-delay: 0.4s; }
+  .layer-wrapper:nth-child(5) { animation-delay: 0.5s; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    border-top: 1px solid var(--border);
+    padding-top: 30px;
+    letter-spacing: 2px;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .flow-section { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">System Architecture · EU261 Compliance · Sepolia Testnet</div>
+    <h1>✈️ Blockchain <span>Flight Compensation</span> System</h1>
+    <p>// Web3-Enabled Automated ETH Disbursement via Smart Transactions</p>
+  </div>
+
+  <!-- 5-LAYER ARCHITECTURE -->
+  <div class="section-title">01 // 5-Layer System Architecture</div>
+  <div class="layers-grid">
+
+    <!-- Layer 1 -->
+    <div class="layer-wrapper">
+      <div class="layer-box layer-1">
+        <div class="layer-header">
+          <div class="layer-icon">🖥️</div>
+          <div>
+            <div class="layer-title">LAYER 1 — FRONTEND</div>
+            <div class="layer-tech">React / Vite · JavaScript · ethers.js v6.16.0</div>
+          </div>
+        </div>
+        <div class="layer-components">
+          <span class="component-chip">Login / Auth Page</span>
+          <span class="component-chip">Booking Page (Flight Management)</span>
+          <span class="component-chip">Compensation Claim Page (ETH)</span>
+          <span class="component-chip">Testing Panel (Admin Delay Updates)</span>
+          <span class="component-chip">MetaMask Wallet Integration</span>
+          <span class="component-chip">ethers.js v6.16.0 Web3 Library</span>
+        </div>
+      </div>
+      <div class="connector">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+    </div>
+
+    <!-- Layer 2 -->
+    <div class="layer-wrapper">
+      <div class="layer-box layer-2">
+        <div class="layer-header">
+          <div class="layer-icon">⚙️</div>
+          <div>
+            <div class="layer-title">LAYER 2 — BACKEND</div>
+            <div class="layer-tech">Flask API · Python · Web3.py</div>
+          </div>
+        </div>
+        <div class="layer-components">
+          <span class="component-chip">Authentication Service (JWT)</span>
+          <span class="component-chip">Booking Management (/api/bookings)</span>
+          <span class="component-chip">Compensation Calculator (EU261)</span>
+          <span class="component-chip">Blockchain Service (Web3/Sepolia)</span>
+          <span class="component-chip">Database Manager (MongoDB)</span>
+        </div>
+      </div>
+      <div class="connector">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+    </div>
+
+    <!-- Layer 3 -->
+    <div class="layer-wrapper">
+      <div class="layer-box layer-3">
+        <div class="layer-header">
+          <div class="layer-icon">🗄️</div>
+          <div>
+            <div class="layer-title">LAYER 3 — DATABASE</div>
+            <div class="layer-tech">MongoDB · NoSQL · Data Persistence</div>
+          </div>
+        </div>
+        <div class="layer-components">
+          <span class="component-chip">Users Collection</span>
+          <span class="component-chip">Bookings Collection</span>
+          <span class="component-chip">Claims Collection</span>
+          <span class="component-chip">Sessions Collection</span>
+        </div>
+      </div>
+      <div class="connector">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+    </div>
+
+    <!-- Layer 4 -->
+    <div class="layer-wrapper">
+      <div class="layer-box layer-4">
+        <div class="layer-header">
+          <div class="layer-icon">⛓️</div>
+          <div>
+            <div class="layer-title">LAYER 4 — BLOCKCHAIN</div>
+            <div class="layer-tech">Sepolia Testnet · Ethereum · Infura RPC</div>
+          </div>
+        </div>
+        <div class="layer-components">
+          <span class="component-chip">Web3 Connection via Infura RPC</span>
+          <span class="component-chip">Deployer Wallet (0xfD03Df67...)</span>
+          <span class="component-chip">Transaction Signing & Sending</span>
+          <span class="component-chip">ETH Transfer Execution</span>
+          <span class="component-chip">Nonce & Gas Management</span>
+        </div>
+      </div>
+      <div class="connector">
+        <div class="connector-line"></div>
+        <div class="connector-arrow"></div>
+      </div>
+    </div>
+
+    <!-- Layer 5 -->
+    <div class="layer-wrapper">
+      <div class="layer-box layer-5">
+        <div class="layer-header">
+          <div class="layer-icon">🌐</div>
+          <div>
+            <div class="layer-title">LAYER 5 — EXTERNAL SERVICES</div>
+            <div class="layer-tech">CoinGecko API · Sepolia Etherscan</div>
+          </div>
+        </div>
+        <div class="layer-components">
+          <span class="component-chip">CoinGecko API (Live ETH/USD Pricing)</span>
+          <span class="component-chip">Sepolia Etherscan (TX Verification)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FLOW DIAGRAMS (SIDE BY SIDE) -->
+  <div class="flow-section">
+
+    <!-- Compensation Flow -->
+    <div class="flow-card">
+      <div class="section-title">02 // Compensation Logic Flow</div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">01</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">USER SELECTS FLIGHT</div>
+            <div class="step-sub">Passenger picks delayed booking from dashboard</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">02</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">VALIDATE DELAY ≥ 2 HOURS</div>
+            <div class="step-sub">System checks delay_minutes against EU261 threshold</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">03</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">CALCULATE ETH AMOUNT</div>
+            <div class="step-sub">
+              <span>2–3 hrs → 0.010 ETH (~$20)</span>
+              <span>3–4 hrs → 0.015 ETH (~$30)</span>
+              <span>4+ hrs → 0.020 ETH (~$40)</span>
+              <span>24+ hrs → 0.050 ETH (~$100)</span>
+            </div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">04</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">CHECK DEPLOYER BALANCE</div>
+            <div class="step-sub">Verify 0xfD03Df67... has sufficient ETH</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">05</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">BUILD & SIGN TRANSACTION</div>
+            <div class="step-sub">Sign with Private Key · Create Raw TX</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">06</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">SEND TO BLOCKCHAIN</div>
+            <div class="step-sub">Broadcast signed TX to Sepolia network</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">07</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">MARK BOOKING CLAIMED</div>
+            <div class="step-sub">Update MongoDB: compensation_claimed = true</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">08</div></div>
+          <div class="step-content">
+            <div class="step-title">RETURN TX HASH TO USER</div>
+            <div class="step-sub">Display hash · Verify on Etherscan</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claim Process Flow -->
+    <div class="flow-card">
+      <div class="section-title">03 // End-to-End Claim Process</div>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">①</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">USER CONNECTS METAMASK</div>
+            <div class="step-sub">ethers.js v6 · wallet detection & connection</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">②</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">FRONTEND SENDS CLAIM REQUEST</div>
+            <div class="step-sub">POST /api/claims · JWT-authenticated</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">③</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">BACKEND VALIDATES</div>
+            <div class="step-sub">Check user identity · verify booking ownership</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">④</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">CALCULATE COMPENSATION</div>
+            <div class="step-sub">Apply EU261/2004 regulation rules</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">⑤</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">LOAD PRIVATE KEY</div>
+            <div class="step-sub">Read from .env · never exposed to frontend</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">⑥</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">SIGN TRANSACTION</div>
+            <div class="step-sub">web3.py · nonce management · gas pricing</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">⑦</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">SEND TO SEPOLIA</div>
+            <div class="step-sub">Infura RPC endpoint · raw transaction broadcast</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">⑧</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">BLOCKCHAIN CONFIRMS</div>
+            <div class="step-sub">Network mines block · TX hash returned</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">⑨</div><div class="step-vline"></div></div>
+          <div class="step-content">
+            <div class="step-title">FRONTEND SHOWS HASH</div>
+            <div class="step-sub">TX hash displayed · Etherscan verification link</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="step-left"><div class="step-num">⑩</div></div>
+          <div class="step-content">
+            <div class="step-title">USER VERIFIES ON ETHERSCAN</div>
+            <div class="step-sub">Public ledger · immutable proof of payment</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPENSATION TABLE -->
+  <div class="section-title">04 // EU261 Compensation Tiers</div>
+  <div class="flow-card" style="margin-bottom: 40px;">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Delay Duration</th>
+          <th>ETH Amount</th>
+          <th>USD Equivalent</th>
+          <th>EU261 Classification</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>2 – 3 hours</td>
+          <td class="eth">0.010 ETH</td>
+          <td class="usd">~$20</td>
+          <td>Short delay — partial comp</td>
+        </tr>
+        <tr>
+          <td>3 – 4 hours</td>
+          <td class="eth">0.015 ETH</td>
+          <td class="usd">~$30</td>
+          <td>Medium delay — standard comp</td>
+        </tr>
+        <tr>
+          <td>4+ hours</td>
+          <td class="eth">0.020 ETH</td>
+          <td class="usd">~$40</td>
+          <td>Long delay — full comp</td>
+        </tr>
+        <tr>
+          <td>24+ hours</td>
+          <td class="eth">0.050 ETH</td>
+          <td class="usd">~$100</td>
+          <td>Cancellation / extreme delay</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="tech-section">
+    <div class="section-title">05 // Technology Stack</div>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-emoji">⚛️</div>
+        <div class="tech-info">
+          <div class="tech-name">React / Vite</div>
+          <div class="tech-role">User Interface Framework</div>
+        </div>
+        <span class="tech-layer-tag tag-frontend">FRONTEND</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">🦊</div>
+        <div class="tech-info">
+          <div class="tech-name">ethers.js v6</div>
+          <div class="tech-role">Web3 Wallet Connection</div>
+        </div>
+        <span class="tech-layer-tag tag-frontend">FRONTEND</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">🐍</div>
+        <div class="tech-info">
+          <div class="tech-name">Flask API</div>
+          <div class="tech-role">Python Business Logic</div>
+        </div>
+        <span class="tech-layer-tag tag-backend">BACKEND</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">🔗</div>
+        <div class="tech-info">
+          <div class="tech-name">Web3.py</div>
+          <div class="tech-role">Blockchain TX Management</div>
+        </div>
+        <span class="tech-layer-tag tag-backend">BACKEND</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">🍃</div>
+        <div class="tech-info">
+          <div class="tech-name">MongoDB</div>
+          <div class="tech-role">NoSQL Data Persistence</div>
+        </div>
+        <span class="tech-layer-tag tag-db">DATABASE</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">⟠</div>
+        <div class="tech-info">
+          <div class="tech-name">Sepolia Testnet</div>
+          <div class="tech-role">Ethereum ETH Transfers</div>
+        </div>
+        <span class="tech-layer-tag tag-blockchain">BLOCKCHAIN</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">🔌</div>
+        <div class="tech-info">
+          <div class="tech-name">Infura RPC</div>
+          <div class="tech-role">Node Provider / Blockchain Access</div>
+        </div>
+        <span class="tech-layer-tag tag-rpc">RPC</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-emoji">💰</div>
+        <div class="tech-info">
+          <div class="tech-name">CoinGecko API</div>
+          <div class="tech-role">Live ETH/USD Price Feed</div>
+        </div>
+        <span class="tech-layer-tag tag-external">EXTERNAL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATABASE SCHEMA -->
+  <div class="schema-section">
+    <div class="section-title">06 // MongoDB Booking Schema</div>
+    <div class="schema-box">
+      <span class="schema-brace">{</span><br>
+      &nbsp;&nbsp;<span class="schema-key">_id</span>: <span class="schema-type">ObjectId</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="schema-comment">// Primary key (auto-generated)</span><br>
+      &nbsp;&nbsp;<span class="schema-key">user_id</span>: <span class="schema-type">String</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="schema-comment">// Reference to Users collection</span><br>
+      &nbsp;&nbsp;<span class="schema-key">flight_number</span>: <span class="schema-type">String</span>,&nbsp;&nbsp;<span class="schema-comment">// e.g. "BA2490"</span><br>
+      &nbsp;&nbsp;<span class="schema-key">delay_minutes</span>: <span class="schema-type">Number</span>,&nbsp;&nbsp;<span class="schema-comment">// EU261 threshold check</span><br>
+      &nbsp;&nbsp;<span class="schema-key">status</span>: <span class="schema-type">String</span>,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="schema-comment">// "delayed" | "completed" | "cancelled"</span><br>
+      &nbsp;&nbsp;<span class="schema-key">compensation</span>: <span class="schema-brace">{</span><br>
+      <span class="schema-nested"><span class="schema-key">eth_amount</span>: <span class="schema-type">Number</span>,&nbsp;&nbsp;&nbsp;<span class="schema-comment">// 0.010 / 0.015 / 0.020 / 0.050</span></span><br>
+      <span class="schema-nested"><span class="schema-key">usd_value</span>: <span class="schema-type">Number</span>,&nbsp;&nbsp;&nbsp;&nbsp;<span class="schema-comment">// Live price from CoinGecko</span></span><br>
+      <span class="schema-nested"><span class="schema-key">description</span>: <span class="schema-type">String</span>,&nbsp;&nbsp;<span class="schema-comment">// Human-readable tier label</span></span><br>
+      <span class="schema-nested"><span class="schema-key">type</span>: <span class="schema-type">String</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="schema-comment">// Classification key</span></span><br>
+      &nbsp;&nbsp;<span class="schema-brace">}</span>,<br>
+      &nbsp;&nbsp;<span class="schema-key">compensation_claimed</span>: <span class="schema-type">Boolean</span>,&nbsp;&nbsp;<span class="schema-comment">// Prevents double-claim</span><br>
+      &nbsp;&nbsp;<span class="schema-key">tx_hash</span>: <span class="schema-type">String</span>&nbsp;&nbsp;<span class="schema-comment">// Optional · set after blockchain TX</span><br>
+      &nbsp;&nbsp;<span class="schema-key">created_at</span>: <span class="schema-type">Date</span>&nbsp;&nbsp;&nbsp;<span class="schema-comment">// ISO timestamp</span><br>
+      <span class="schema-brace">}</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    ✈️ &nbsp;BLOCKCHAIN FLIGHT COMPENSATION SYSTEM &nbsp;·&nbsp; EU261/2004 COMPLIANT &nbsp;·&nbsp; SEPOLIA TESTNET &nbsp;·&nbsp; 5-LAYER ARCHITECTURE
+  </div>
+
+</div>
+</body>
+</html>

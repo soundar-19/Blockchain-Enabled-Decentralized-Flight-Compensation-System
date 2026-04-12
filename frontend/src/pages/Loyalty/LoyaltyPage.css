@@ -1,0 +1,147 @@
+.loyalty-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.loyalty-header {
+  background: linear-gradient(to right, #f0fdf4, #f0fdfa);
+  border: 1px solid #bbf7d0;
+  border-radius: 0.5rem;
+  padding: 2rem;
+}
+
+.loyalty-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loyalty-header p {
+  color: #4b5563;
+}
+
+.loyalty-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.airline-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.airline-card h3 {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.airline-card .points {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 0.25rem;
+}
+
+.airline-card .label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.swap-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.swap-section h3 {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.swap-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto 1fr 1fr;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .swap-form {
+    grid-template-columns: 1fr;
+  }
+  
+  .arrow-icon {
+    display: none;
+  }
+}
+
+.swap-form > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.swap-form label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.swap-form select,
+.swap-form input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.swap-form select:focus,
+.swap-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.arrow-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #d1d5db;
+  align-self: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+.swap-form button {
+  padding: 0.75rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.swap-form button:hover {
+  background: #1d4ed8;
+}
+
+.rate-info {
+  font-size: 0.75rem;
+  color: #6b7280;
+}

@@ -1,0 +1,197 @@
+# System Integration Status
+
+## ✅ COMPLETED
+
+### Backend Integration
+- [x] New MongoDB-integrated `app.py` created at root of backend
+- [x] All endpoints working: auth, bookings, compensations, testing
+- [x] Wallet creation for every user (real Ethereum or fallback mock)
+- [x] Auto-compensation calculation based on EU261 rules
+- [x] Backend running on http://localhost:5000
+- [x] No reloader issues (disabled for Windows)
+
+### Frontend Updates
+- [x] Layout.jsx shows wallet address and wallet status
+- [x] AppRouter properly handles user persistence
+- [x] Account normalization (_id and id both available)
+- [x] TestingPage added to routing
+- [x] BookingPageSimple connected to MongoDB API
+- [x] CompensatePageSimple connected to MongoDB API
+- [x] All pages show user's wallet info
+
+### Database (MongoDB)
+- [x] Collections ready: users, bookings, (claims optional)
+- [x] All data persisted
+- [x] Compensation auto-calculated on booking
+
+## How to Use
+
+### 1. Start Backend
+```bash
+cd backend
+python app.py
+```
+✓ Running on http://localhost:5000
+
+### 2. Start Frontend  
+```bash
+cd frontend
+npm run dev
+```
+✓ Running on http://localhost:5173 or :5176
+
+### 3. Register User
+- Go to http://localhost:5173/register
+- Enter name, email, password
+- ✓ User created in MongoDB
+- ✓ Wallet auto-generated on Sepolia testnet
+- Redirected to Dashboard
+
+### 4. View Wallet Info
+- After login, check top right header
+- Shows: Name, Email, Wallet Address (truncated), & Wallet Status
+- Example: `✓ Wallet Ready` (means on Sepolia)
+
+### 5. Book Flight
+- Go to "Booking" page
+- Select flight + seat
+- Click "Book This Flight"
+- ✓ Booking saved to MongoDB
+- ✓ Compensation calculated
+- Booking appears in "Your Bookings"
+
+### 6. Test Delay Modification
+- Go to "Testing" page (admin)
+- Select any booking
+- Click "Update Delay"
+- Change delay_minutes (e.g., 120, 300, 400)
+- Click "Save"
+- ✓ Delay updated in MongoDB
+- ✓ Compensation recalculated automatically
+
+### 7. Claim Compensation
+- Go to "Compensate" page
+- Select booking with available FLY
+- Choose "FLY Tokens" or "Voucher"
+- Click "Claim"
+- ✓ Blockchain transaction initiated (or fallback)
+- ✓ Booking marked as claimed
+
+## Data Flow
+
+```
+User Registration
+  ↓ POST /api/auth/register
+  ↓ Create wallet (eth_account library)
+  ↓ Store in MongoDB users collection
+  ↓ Return JWT + user object with address & wallet_created=true
+
+Display User Info
+  ↓ Layout shows account.address (wallet) + account.wallet_created
+  ↓ Shows wallet address truncated format
+
+Book Flight
+  ↓ POST /api/bookings/create
+  ↓ Calculate compensation based on delay
+  ↓ Store in MongoDB bookings collection
+  ↓ Frontend refreshes from GET /api/bookings/user/<id>
+
+Update Delay (Testing)
+  ↓ POST /api/test/update-delay
+  ↓ Recalculate compensation
+  ↓ Update booking in MongoDB
+  ↓ Return new compensation values
+
+Claim Compensation
+  ↓ POST /api/bookings/compensation/<booking_id>
+  ↓ Attempt blockchain transfer
+  ↓ Mark booking as compensation_claimed=true
+  ↓ Update user fly_balance
+```
+
+## Key Features Working
+
+✅ **User Wallet Creation**
+- Every user gets real Sepolia wallet (via eth_account)
+- Or mock wallet if library fails
+- Wallet address stored in MongoDB
+- Displayed in UI
+
+✅ **Wallet Balance Display**
+- Account avatar section shows:
+  - User name
+  - User email  
+  - Wallet address (0x...truncated)
+  - "✓ Wallet Ready" status
+
+✅ **Booking to MongoDB**
+- All bookings stored in database
+- Not lost on page refresh
+- Synced across all pages
+
+✅ **Compensation Auto-Calculation**
+- Based on delay_minutes
+- Updated when delay changes
+- Follows EU261 rules
+
+✅ **Testing Admin Panel**
+- View all bookings
+- Modify delays
+- Check wallet balances
+- Verify transactions
+
+## Endpoints Available
+
+### Auth
+- POST /api/auth/register - Create user with wallet
+- POST /api/auth/login - Login user  
+
+### Bookings
+- POST /api/bookings/create - Create booking
+- GET /api/bookings/user/<id> - Get user bookings
+- POST /api/bookings/compensation/<id> - Claim compensation
+
+### Testing
+- POST /api/test/update-delay - Update delay
+- GET /api/test/all-bookings - All bookings
+- GET /api/test/users - All users  
+- GET /api/test/wallet-balance/<addr> - Check balance
+
+## Environment Setup
+
+Create `.env` in root:
+```
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB=flight
+JWT_SECRET=skyguard-jwt-secret-2026
+SECRET_KEY=skyguard-secret-key
+VITE_API_URL=http://localhost:5000/api
+```
+
+## Troubleshooting
+
+### Frontend says "Please log in" even though logged in
+✓ FIXED: Account normalization ensures _id is always present
+
+### Wallet not showing in UI
+✓ FIXED: Layout now displays account.address and wallet_created status
+
+### Backend socket errors
+✓ FIXED: Disabled reloader with use_reloader=False
+
+### Bookings not saving
+✓ Verify MongoDB is running: mongod
+✓ Check backend is running on :5000
+✓ Check browser console for errors
+
+## Next Steps
+
+1. MongoDB running locally or cloud ✓
+2. Backend started on :5000 ✓
+3. Frontend started on :5173 ✓
+4. Register → Login → Book → Claim workflow ready ✓
+5. Optional: Configure Sepolia for real blockchain transfers
+
+---
+
+**System is fully integrated and ready to use!**

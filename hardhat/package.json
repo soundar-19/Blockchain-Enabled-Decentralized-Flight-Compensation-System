@@ -1,0 +1,40 @@
+{
+  "name": "flight-compensation-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for blockchain flight compensation system",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network polygonAmoy",
+    "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
+    "verify": "hardhat verify --network polygonAmoy",
+    "node": "hardhat node",
+    "clean": "hardhat clean",
+    "flatten": "hardhat flatten"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "polygon",
+    "flight",
+    "compensation",
+    "smart-contracts"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "hardhat": "^2.19.0",
+    "chai": "^4.3.7",
+    "ethers": "^6.7.0",
+    "dotenv": "^16.0.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@chainlink/contracts": "^0.6.1"
+  }
+}

@@ -1,0 +1,146 @@
+.vouchers-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.vouchers-header {
+  background: linear-gradient(to right, #f0fdf4, #f0fdfa);
+  border: 1px solid #bbf7d0;
+  border-radius: 0.5rem;
+  padding: 2rem;
+}
+
+.vouchers-header h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vouchers-header p {
+  color: #15803d;
+  margin-bottom: 1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stats-grid > div {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stats-grid p {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.voucher-section {
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.voucher-section h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.voucher-section .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.vouchers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.voucher-card {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border-left: 4px solid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.voucher-orange {
+  background: #fff7ed;
+  border-left-color: #ea580c;
+}
+
+.voucher-blue {
+  background: #f0f9ff;
+  border-left-color: #2563eb;
+}
+
+.voucher-green {
+  background: #f0fdf4;
+  border-left-color: #16a34a;
+}
+
+.voucher-purple {
+  background: #faf5ff;
+  border-left-color: #9333ea;
+}
+
+.voucher-card h4 {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.voucher-card p {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.voucher-card .amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-align: right;
+}
+
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: #9ca3af;
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}

@@ -1,10 +1,12 @@
 @echo off
+REM SkyGuard DAO - Backend Startup Script
+
 echo ========================================
 echo   SkyGuard DAO - Backend Startup
 echo ========================================
 echo.
 
-echo [1/4] Checking Python installation...
+echo [1/3] Checking Python installation...
 python --version
 if errorlevel 1 (
     echo ERROR: Python is not installed or not in PATH
@@ -13,8 +15,8 @@ if errorlevel 1 (
 )
 
 echo.
-echo [2/4] Installing Python dependencies...
-cd backend
+echo [2/3] Installing Python dependencies...
+cd /d "%~dp0backend"
 pip install -r requirements.txt
 if errorlevel 1 (
     echo ERROR: Failed to install dependencies
@@ -23,12 +25,13 @@ if errorlevel 1 (
 )
 
 echo.
-echo [3/4] Generating dummy blockchain data...
-cd ..
-python scripts\generate_dummy_data.py
-
+echo [3/3] Starting Flask backend server...
 echo.
-echo [4/4] Starting Flask backend server...
-python backend\api\app.py
+echo Backend will be available at: http://localhost:5000
+echo Press Ctrl+C to stop the server
+echo.
+
+REM Start the Flask app directly
+python api/app.py
 
 pause

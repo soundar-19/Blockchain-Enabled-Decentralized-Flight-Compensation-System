@@ -1,0 +1,239 @@
+.marketplace-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.marketplace-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.tab-button {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6b7280;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+}
+
+.tab-button.active {
+  border-bottom-color: #2563eb;
+  color: #2563eb;
+}
+
+.tab-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.tab-content {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+.tab-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab-content p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.listings-grid,
+.tickets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.listing-card,
+.ticket-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.listing-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.flight-number {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: #2563eb;
+  margin-bottom: 0.25rem;
+}
+
+.class-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.route,
+.date {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
+}
+
+.price-section {
+  text-align: right;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #16a34a;
+  margin-bottom: 0.25rem;
+}
+
+.original {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  text-decoration: line-through;
+  margin-bottom: 0.25rem;
+}
+
+.discount {
+  font-size: 0.75rem;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.buy-btn,
+.ticket-card button {
+  width: 100%;
+  padding: 0.75rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.buy-btn:hover,
+.ticket-card button:hover {
+  background: #15803d;
+}
+
+.ticket-card {
+  text-align: center;
+}
+
+.ticket-card p {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.ticket-card .route {
+  margin-bottom: 1rem;
+}
+
+.ticket-card button {
+  background: #2563eb;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.ticket-card button:hover {
+  background: #1d4ed8;
+}
+
+.sell-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.sell-form select,
+.sell-form input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.sell-form select:focus,
+.sell-form input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.sell-form button {
+  padding: 0.75rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.sell-form button:hover {
+  background: #15803d;
+}
+
+.btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #9ca3af;
+}
+
+.empty-state svg {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  color: #d1d5db;
+}

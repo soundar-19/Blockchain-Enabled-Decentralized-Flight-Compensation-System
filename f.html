@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blockchain Flight Compensation – Workflow Flowchart</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #eef0f4;
+    padding: 40px 20px 80px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+  .header h1 {
+    font-size: 1.55rem;
+    font-weight: 900;
+    color: #1e1e2e;
+    letter-spacing: -0.02em;
+  }
+  .header p {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+  .header-badge {
+    display: inline-block;
+    margin-top: 10px;
+    background: #7c6aee;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── MAIN FLOW WRAPPER ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── CONNECTOR ARROW ── */
+  .arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 48px;
+    position: relative;
+  }
+  .arrow-line {
+    width: 2.5px;
+    flex: 1;
+    background: #9ca3af;
+  }
+  .arrow-head {
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid #9ca3af;
+  }
+  .arrow.green .arrow-line { background: #34c98a; }
+  .arrow.green .arrow-head { border-top-color: #34c98a; }
+  .arrow.red .arrow-line { background: #f06767; }
+  .arrow.red .arrow-head { border-top-color: #f06767; }
+  .arrow.purple .arrow-line { background: #7c6aee; }
+  .arrow.purple .arrow-head { border-top-color: #7c6aee; }
+  .arrow.amber .arrow-line { background: #f5832a; }
+  .arrow.amber .arrow-head { border-top-color: #f5832a; }
+
+  .arrow-label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: calc(50% + 10px);
+    font-size: 0.68rem;
+    font-weight: 800;
+    white-space: nowrap;
+    padding: 3px 10px;
+    border-radius: 8px;
+  }
+  .arrow-label.green { background: #d1fae5; color: #059669; }
+  .arrow-label.red   { background: #fee2e2; color: #dc2626; }
+
+  /* ── BOX NODE ── */
+  .box {
+    width: 340px;
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+    position: relative;
+  }
+  .box-icon {
+    font-size: 2rem;
+    width: 54px; height: 54px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.22);
+  }
+  .box-text { flex: 1; }
+  .box-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .box-sub {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.78);
+    font-weight: 600;
+    margin-top: 3px;
+  }
+  .box-tag {
+    position: absolute;
+    top: -12px; right: 16px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-size: 0.62rem;
+    font-weight: 800;
+    color: #374151;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* node colours */
+  .yellow  { background: linear-gradient(135deg,#f5c518,#f0a500); }
+  .yellow .box-title { color: #1a1a1a; }
+  .yellow .box-sub   { color: rgba(0,0,0,0.55); }
+  .purple  { background: linear-gradient(135deg,#7c6aee,#5b4ccc); }
+  .blue    { background: linear-gradient(135deg,#4da6f5,#2280d8); }
+  .green   { background: linear-gradient(135deg,#34c98a,#1ea86e); }
+  .red     { background: linear-gradient(135deg,#f06767,#d63a3a); }
+  .orange  { background: linear-gradient(135deg,#f5832a,#d4620e); }
+  .dark    { background: linear-gradient(135deg,#1e293b,#0f172a); }
+  .teal    { background: linear-gradient(135deg,#0ea5e9,#0284c7); }
+
+  /* ── DIAMOND DECISION ── */
+  .diamond-outer {
+    width: 200px; height: 200px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .diamond-shape {
+    width: 150px; height: 150px;
+    transform: rotate(45deg);
+    border-radius: 14px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+  }
+  .diamond-content {
+    position: absolute;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+    pointer-events: none;
+  }
+  .diamond-content .d-icon { font-size: 1.6rem; }
+  .diamond-content .d-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* ── BRANCH (side exit for NO) ── */
+  .branch-row {
+    display: flex;
+    align-items: center;
+    width: 640px;
+    position: relative;
+    justify-content: center;
+  }
+  .branch-center {
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  /* side branch box */
+  .side-box {
+    position: absolute;
+    right: 0;
+    width: 170px;
+    border-radius: 16px;
+    padding: 14px 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+    text-align: center;
+  }
+  .side-box .s-icon { font-size: 1.6rem; }
+  .side-box .s-title { font-size: 0.78rem; font-weight: 800; color: #fff; line-height: 1.2; }
+  .side-box .s-sub   { font-size: 0.63rem; color: rgba(255,255,255,0.75); font-weight: 600; }
+
+  /* SVG for branch arrows */
+  .branch-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  /* ── COMPENSATION TIER CARD ── */
+  .tier-card {
+    width: 340px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 18px 22px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+    border: 2.5px dashed #f5c518;
+  }
+  .tier-card h4 {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: #f5832a;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tier-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    padding: 7px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .tier-row:last-child { border-bottom: none; }
+  .t-delay { font-size: 0.68rem; font-weight: 700; color: #374151; }
+  .t-eth   { font-size: 0.72rem; font-weight: 800; color: #7c6aee; text-align: center; }
+  .t-usd   { font-size: 0.68rem; font-weight: 700; color: #34c98a; text-align: right; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>✈️ Blockchain Flight Compensation System</h1>
+  <p>End-to-End Workflow Flowchart &nbsp;·&nbsp; EU261 Regulation &nbsp;·&nbsp; Sepolia Testnet</p>
+  <span class="header-badge">PROJECT REPORT — PROCESS FLOW</span>
+</div>
+
+<div class="flow">
+
+  <!-- ══ STEP 1: ORDER ══ -->
+  <div class="box yellow">
+    <div class="box-icon">🛫</div>
+    <div class="box-text">
+      <div class="box-title">Passenger Boards Flight</div>
+      <div class="box-sub">User logs in &amp; selects flight from dashboard</div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 2: RECEIVE ORDER ══ -->
+  <div class="box purple">
+    <div class="box-tag">⚙️ Flask API</div>
+    <div class="box-icon">📋</div>
+    <div class="box-text">
+      <div class="box-title">Receive Booking Request</div>
+      <div class="box-sub">Backend validates JWT token &amp; fetches booking from MongoDB</div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 3: CHECK DELAY ══ -->
+  <div class="box blue">
+    <div class="box-tag">🍃 MongoDB</div>
+    <div class="box-icon">⏱️</div>
+    <div class="box-text">
+      <div class="box-title">Check Flight Delay Status</div>
+      <div class="box-sub">Query delay_minutes from bookings collection</div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ DECISION 1: DELAY ≥ 2hrs? ══ -->
+  <div class="branch-row" style="height:220px;">
+    <svg class="branch-svg" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0,9 3.5,0 7" fill="#9ca3af"/>
+        </marker>
+        <marker id="a-red" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0,9 3.5,0 7" fill="#f06767"/>
+        </marker>
+        <marker id="a-green" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0,9 3.5,0 7" fill="#34c98a"/>
+        </marker>
+      </defs>
+      <!-- YES down arrow -->
+      <line x1="320" y1="170" x2="320" y2="210" stroke="#34c98a" stroke-width="2.5" marker-end="url(#a-green)"/>
+      <!-- NO right arrow to side box -->
+      <path d="M395,110 Q510,110 510,60" stroke="#f06767" stroke-width="2.5" fill="none" marker-end="url(#a-red)"/>
+      <!-- YES label -->
+      <rect x="330" y="178" width="60" height="20" rx="6" fill="#d1fae5"/>
+      <text x="360" y="192" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#059669">✔ YES</text>
+      <!-- NO label -->
+      <rect x="440" y="98" width="58" height="20" rx="6" fill="#fee2e2"/>
+      <text x="469" y="112" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#dc2626">✖ NO</text>
+    </svg>
+    <div class="branch-center">
+      <div class="diamond-outer">
+        <div class="diamond-shape blue"></div>
+        <div class="diamond-content">
+          <div class="d-icon">❓</div>
+          <div class="d-label">Delay<br>≥ 2 hrs?</div>
+        </div>
+      </div>
+    </div>
+    <!-- Side: Cancel -->
+    <div class="side-box red" style="top:10px;">
+      <div class="s-icon">❌</div>
+      <div class="s-title">Not Eligible</div>
+      <div class="s-sub">Delay &lt; 2hrs. No compensation under EU261.</div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: CALC COMPENSATION ══ -->
+  <div class="box orange">
+    <div class="box-tag">📐 EU261 Rules</div>
+    <div class="box-icon">🧮</div>
+    <div class="box-text">
+      <div class="box-title">Calculate ETH Compensation</div>
+      <div class="box-sub">Apply EU261 tier rules → compute ETH + USD value</div>
+    </div>
+  </div>
+
+  <div class="arrow amber">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- TIER CARD -->
+  <div class="tier-card">
+    <h4>⚡ EU261 Compensation Tiers</h4>
+    <div class="tier-row">
+      <span class="t-delay">⏱ 2 – 3 hrs</span>
+      <span class="t-eth">0.010 ETH</span>
+      <span class="t-usd">~$20</span>
+    </div>
+    <div class="tier-row">
+      <span class="t-delay">⏱ 3 – 4 hrs</span>
+      <span class="t-eth">0.015 ETH</span>
+      <span class="t-usd">~$30</span>
+    </div>
+    <div class="tier-row">
+      <span class="t-delay">⏱ 4 – 24 hrs</span>
+      <span class="t-eth">0.020 ETH</span>
+      <span class="t-usd">~$40</span>
+    </div>
+    <div class="tier-row">
+      <span class="t-delay">⏱ 24+ hrs</span>
+      <span class="t-eth">0.050 ETH</span>
+      <span class="t-usd">~$100</span>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 5: CONNECT METAMASK ══ -->
+  <div class="box teal">
+    <div class="box-tag">🦊 MetaMask</div>
+    <div class="box-icon">🔗</div>
+    <div class="box-text">
+      <div class="box-title">User Connects Wallet</div>
+      <div class="box-sub">ethers.js v6 detects &amp; connects MetaMask wallet</div>
+    </div>
+  </div>
+
+  <div class="arrow">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ DECISION 2: WALLET VALID? ══ -->
+  <div class="branch-row" style="height:220px;">
+    <svg class="branch-svg" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0,9 3.5,0 7" fill="#9ca3af"/>
+        </marker>
+        <marker id="a2r" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0,9 3.5,0 7" fill="#f06767"/>
+        </marker>
+        <marker id="a2g" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0,9 3.5,0 7" fill="#34c98a"/>
+        </marker>
+      </defs>
+      <line x1="320" y1="170" x2="320" y2="210" stroke="#34c98a" stroke-width="2.5" marker-end="url(#a2g)"/>
+      <path d="M395,110 Q510,110 510,60" stroke="#f06767" stroke-width="2.5" fill="none" marker-end="url(#a2r)"/>
+      <rect x="330" y="178" width="60" height="20" rx="6" fill="#d1fae5"/>
+      <text x="360" y="192" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#059669">✔ YES</text>
+      <rect x="440" y="98" width="58" height="20" rx="6" fill="#fee2e2"/>
+      <text x="469" y="112" text-anchor="middle" font-family="Nunito" font-size="11" font-weight="800" fill="#dc2626">✖ NO</text>
+    </svg>
+    <div class="branch-center">
+      <div class="diamond-outer">
+        <div class="diamond-shape" style="background:linear-gradient(135deg,#f5832a,#d4620e);"></div>
+        <div class="diamond-content">
+          <div class="d-icon">💳</div>
+          <div class="d-label">Wallet<br>Valid?</div>
+        </div>
+      </div>
+    </div>
+    <div class="side-box red" style="top:10px;">
+      <div class="s-icon">⚠️</div>
+      <div class="s-title">Invalid Wallet</div>
+      <div class="s-sub">Ask user to reconnect or switch account</div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6: CHECK BALANCE ══ -->
+  <div class="box dark">
+    <div class="box-tag">🔐 .env Key</div>
+    <div class="box-icon">💰</div>
+    <div class="box-text">
+      <div class="box-title">Check Deployer Balance</div>
+      <div class="box-sub">Load private key · verify wallet has enough ETH</div>
+    </div>
+  </div>
+
+  <div class="arrow purple">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 7: SIGN TX ══ -->
+  <div class="box purple">
+    <div class="box-tag">⛽ Nonce + Gas</div>
+    <div class="box-icon">🔐</div>
+    <div class="box-text">
+      <div class="box-title">Build &amp; Sign Transaction</div>
+      <div class="box-sub">Web3.py signs raw TX with nonce &amp; gas management</div>
+    </div>
+  </div>
+
+  <div class="arrow purple">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 8: SEND TO BLOCKCHAIN ══ -->
+  <div class="box blue">
+    <div class="box-tag">🌐 Infura RPC</div>
+    <div class="box-icon">⛓️</div>
+    <div class="box-text">
+      <div class="box-title">Send to Sepolia Blockchain</div>
+      <div class="box-sub">Broadcast raw transaction via Infura RPC endpoint</div>
+    </div>
+  </div>
+
+  <div class="arrow purple">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 9: CONFIRM TX ══ -->
+  <div class="box green">
+    <div class="box-icon">✅</div>
+    <div class="box-text">
+      <div class="box-title">Blockchain Confirms TX</div>
+      <div class="box-sub">Sepolia network mines &amp; confirms the ETH transfer</div>
+    </div>
+  </div>
+
+  <div class="arrow green">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 10: UPDATE DB ══ -->
+  <div class="box purple">
+    <div class="box-tag">🍃 MongoDB Update</div>
+    <div class="box-icon">💾</div>
+    <div class="box-text">
+      <div class="box-title">Mark Booking as Claimed</div>
+      <div class="box-sub">Set compensation_claimed = true · save tx_hash to DB</div>
+    </div>
+  </div>
+
+  <div class="arrow green">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 11: ETH TRANSFER ══ -->
+  <div class="box orange">
+    <div class="box-tag">💰 CoinGecko Rate</div>
+    <div class="box-icon">💸</div>
+    <div class="box-text">
+      <div class="box-title">ETH Transferred to Passenger</div>
+      <div class="box-sub">Deployer wallet sends ETH · live USD rate via CoinGecko</div>
+    </div>
+  </div>
+
+  <div class="arrow amber">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 12: RETURN TX HASH ══ -->
+  <div class="box teal">
+    <div class="box-icon">🔖</div>
+    <div class="box-text">
+      <div class="box-title">Return TX Hash to User</div>
+      <div class="box-sub">Frontend displays transaction hash with Etherscan link</div>
+    </div>
+  </div>
+
+  <div class="arrow green">
+    <div class="arrow-line"></div>
+    <div class="arrow-head"></div>
+  </div>
+
+  <!-- ══ STEP 13: VERIFY ══ -->
+  <div class="box yellow">
+    <div class="box-icon">🔍</div>
+    <div class="box-text">
+      <div class="box-title">User Verifies on Etherscan</div>
+      <div class="box-sub" style="color:rgba(0,0,0,0.55);">sepolia.etherscan.io · TX confirmed &amp; visible on-chain</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
