@@ -38,12 +38,14 @@ try:
     app.register_blueprint(bookings_bp)
 except Exception as e:
     print(f"Warning: Could not import bookings blueprint: {e}")
+    print("Hint: this often means a missing dependency. Run: python -m pip install -r requirements.txt")
 
 try:
     from api.blockchain_routes import blockchain_bp
     app.register_blueprint(blockchain_bp)
 except Exception as e:
     print(f"Warning: Could not import blockchain blueprint: {e}")
+    print("Hint: this often means a missing dependency. Run: python -m pip install -r requirements.txt")
 
 # MongoDB connection
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')

@@ -6,6 +6,7 @@ Real blockchain integration with Sepolia testnet
 
 import datetime
 from flask import Blueprint, jsonify, request
+from bson.objectid import ObjectId
 try:
     from ..blockchain.blockchain_service import BlockchainService
     from ..blockchain.wallet_manager import WalletManager
@@ -20,6 +21,39 @@ except ImportError:
     from blockchain.wallet_manager import WalletManager
     from blockchain.web3_config import BlockchainConfig
     from database.db import get_db
+
+# JSON helpers
+
+def get_json_field(data, snake_key, camel_key=None, default=None):
+    if data is None:
+        return default
+    if snake_key in data and data[snake_key] is not None:
+        return data[snake_key]
+    if camel_key and camel_key in data and data[camel_key] is not None:
+        return data[camel_key]
+    return default
+
+
+# Voucher metadata helpers
+def get_voucher_type(claim_type):
+    types = {
+        0: 'food',
+        1: 'hotel',
+        2: 'transport',
+        3: 'refund'
+    }
+    return types.get(int(claim_type), 'refund')
+
+
+def get_voucher_description(claim_type):
+    descriptions = {
+        0: 'Meal voucher for airport refreshments and partner cafes.',
+        1: 'Hotel voucher for overnight accommodation and lounge access.',
+        2: 'Transport voucher for ground transfers and ride-share services.',
+        3: 'Refund voucher for direct reimbursement or flight credits.'
+    }
+    return descriptions.get(int(claim_type), 'Voucher for partner services.')
+
 
 blockchain_bp = Blueprint('blockchain', __name__, url_prefix='/api/blockchain')
 
@@ -145,11 +179,11 @@ def file_compensation_claim():
             return jsonify({'status': 'error', 'message': 'Blockchain service not available'}), 503
         
         data = request.get_json()
-        user_address = data.get('user_address') or data.get('userAddress')
-        flight_number = data.get('flight_number') or data.get('flightNumber')
-        delay_minutes = data.get('delay_minutes') or data.get('delayMinutes')
-        claim_type = data.get('claim_type') or data.get('claimType')
-        route_id = data.get('route_id') or data.get('routeId', 1)
+        user_address = get_json_field(data, 'user_address', 'userAddress')
+        flight_number = get_json_field(data, 'flight_number', 'flightNumber')
+        delay_minutes = get_json_field(data, 'delay_minutes', 'delayMinutes')
+        claim_type = get_json_field(data, 'claim_type', 'claimType')
+        route_id = get_json_field(data, 'route_id', 'routeId', 1)
         
         # Validation
         if not all([user_address, flight_number, delay_minutes is not None, claim_type is not None]):
@@ -438,11 +472,12 @@ def file_voucher_claim():
         data = request.get_json(force=True)
         print(f"   Parsed JSON: {data}")
         
-        user_address = data.get('user_address') or data.get('userAddress')
-        flight_number = data.get('flight_number') or data.get('flightNumber')
-        delay_minutes = data.get('delay_minutes') or data.get('delayMinutes')
-        claim_type = data.get('claim_type') or data.get('claimType')
-        route_id = data.get('route_id') or data.get('routeId', 1)
+        user_address = get_json_field(data, 'user_address', 'userAddress')
+        flight_number = get_json_field(data, 'flight_number', 'flightNumber')
+        delay_minutes = get_json_field(data, 'delay_minutes', 'delayMinutes')
+        claim_type = get_json_field(data, 'claim_type', 'claimType')
+        route_id = get_json_field(data, 'route_id', 'routeId', 1)
+        booking_id = get_json_field(data, 'booking_id', 'bookingId')
         
         print(f"\n   Extracted values:")
         print(f"   - user_address: {user_address} (type: {type(user_address)})")
@@ -450,6 +485,7 @@ def file_voucher_claim():
         print(f"   - delay_minutes: {delay_minutes} (type: {type(delay_minutes)})")
         print(f"   - claim_type: {claim_type} (type: {type(claim_type)})")
         print(f"   - route_id: {route_id} (type: {type(route_id)})")
+        print(f"   - booking_id: {booking_id} (type: {type(booking_id)})")
         
         # Validation
         if not all([user_address, flight_number, delay_minutes is not None, claim_type is not None]):
@@ -458,19 +494,36 @@ def file_voucher_claim():
                 'status': 'error', 
                 'message': 'Missing required fields: user_address, flight_number, delay_minutes, claim_type'
             }), 400
-        
-        # Minimum delay check (must be at least 180 minutes = 3 hours)
-        delay_min_threshold = 180
-        if int(delay_minutes) < delay_min_threshold:
-            print(f"❌ Delay below threshold: {int(delay_minutes)} < {delay_min_threshold}")
-            return jsonify({
-                'status': 'error',
-                'message': f'Delay must be at least {delay_min_threshold} minutes (3 hours)'
-            }), 400
-        
-        # Get database connection
+
+        # Voucher claims can be generated for any delay amount that maps to a voucher value.
+        # The compensation calculation already returns a minimum voucher amount for short delays.
         db = get_db()
         print(f"✓ Database connection obtained")
+
+        # Protect against repeated voucher claims by checking the related booking
+        booking = None
+        if booking_id:
+            try:
+                booking = db.bookings.find_one({'_id': ObjectId(booking_id)})
+            except Exception:
+                booking = None
+
+        if not booking:
+            user = db.users.find_one({
+                '$or': [
+                    {'address': user_address.lower()},
+                    {'metamask_address': user_address.lower()}
+                ]
+            })
+            if user:
+                booking = db.bookings.find_one({'user_id': str(user['_id']), 'flight_number': flight_number})
+
+        if booking and booking.get('compensation_claimed'):
+            print(f"❌ Voucher claim rejected: booking already claimed")
+            return jsonify({
+                'status': 'error',
+                'message': 'This booking has already been claimed for compensation'
+            }), 400
         
         # Calculate compensation amount based on delay and type
         compensation_amount = blockchain_service.calculate_compensation(
@@ -503,18 +556,23 @@ def file_voucher_claim():
             print(f"✓ Voucher Code: {result.get('voucher_code')}")
             
             # Create voucher record in database
+            created_at = __import__('datetime').datetime.utcnow()
+            expires_at = created_at + datetime.timedelta(days=30)
             voucher_record = {
                 'userAddress': user_address.lower(),
                 'flightNumber': flight_number,
                 'delayMinutes': int(delay_minutes),
                 'claimType': int(claim_type),
+                'voucherType': get_voucher_type(claim_type),
+                'voucher_description': get_voucher_description(claim_type),
                 'compensationAmount': compensation_amount,
                 'voucherCode': result['voucher_code'],
                 'transactionHash': result.get('transaction_hash'),
                 'blockNumber': result.get('block_number'),
                 'status': 'active',  # active, redeemed, expired
                 'voucherWallet': '0x32C532f9b48334c3F3f4410494163ec5Af109c62',
-                'createdAt': __import__('datetime').datetime.utcnow(),
+                'createdAt': created_at,
+                'expiresAt': expires_at,
                 'redeemedAt': None,
                 'verificationStatus': 'verified'
             }
@@ -528,6 +586,23 @@ def file_voucher_claim():
                 print(f"❌ Database insertion error: {str(db_error)}")
                 raise
             
+            # Mark booking as claimed when related booking is available
+            if booking:
+                booking_update = {
+                    'compensation_claimed': True,
+                    'claim_method': 'voucher',
+                    'claimed_at': __import__('datetime').datetime.utcnow(),
+                    'claimed_by_address': user_address.lower(),
+                    'voucher_id': str(voucher_result.inserted_id),
+                    'voucher_code': result['voucher_code'],
+                    'tx_hash': result.get('transaction_hash')
+                }
+                try:
+                    db.bookings.update_one({'_id': booking['_id']}, {'$set': booking_update})
+                    print(f"✓ Related booking {booking.get('_id')} marked as claimed")
+                except Exception as update_error:
+                    print(f"❌ Failed to mark booking as claimed: {str(update_error)}")
+
             # Also create a claim record for tracking
             claim_record = {
                 'userAddress': user_address.lower(),
@@ -621,14 +696,20 @@ def get_user_vouchers(user_address):
         
         vouchers = list(db.vouchers.find(
             {'userAddress': user_address.lower()},
-            {'_id': 1, 'voucherCode': 1, 'compensationAmount': 1, 'status': 1, 
-             'createdAt': 1, 'flightNumber': 1, 'transactionHash': 1}
+            {'_id': 1, 'voucherCode': 1, 'compensationAmount': 1, 'status': 1,
+             'createdAt': 1, 'expiresAt': 1, 'redeemedAt': 1, 'flightNumber': 1,
+             'transactionHash': 1, 'claimType': 1, 'delayMinutes': 1, 'voucherType': 1,
+             'voucher_description': 1}
         ).sort('createdAt', -1))
         
         # Convert ObjectIds to strings and format dates
         for voucher in vouchers:
             voucher['_id'] = str(voucher['_id'])
-            voucher['createdAt'] = voucher['createdAt'].isoformat()
+            voucher['createdAt'] = voucher['createdAt'].isoformat() if voucher.get('createdAt') else None
+            voucher['expiresAt'] = voucher['expiresAt'].isoformat() if voucher.get('expiresAt') else None
+            voucher['redeemedAt'] = voucher['redeemedAt'].isoformat() if voucher.get('redeemedAt') else None
+            voucher['voucherType'] = voucher.get('voucherType') or get_voucher_type(voucher.get('claimType', 3))
+            voucher['voucher_description'] = voucher.get('voucher_description') or get_voucher_description(voucher.get('claimType', 3))
         
         return jsonify({
             'status': 'success',
@@ -662,9 +743,12 @@ def verify_voucher(voucher_code):
             return jsonify({'status': 'error', 'message': 'Voucher not found'}), 404
         
         voucher['_id'] = str(voucher['_id'])
-        voucher['createdAt'] = voucher['createdAt'].isoformat()
+        voucher['createdAt'] = voucher['createdAt'].isoformat() if voucher.get('createdAt') else None
+        voucher['expiresAt'] = voucher['expiresAt'].isoformat() if voucher.get('expiresAt') else None
         if voucher.get('redeemedAt'):
             voucher['redeemedAt'] = voucher['redeemedAt'].isoformat()
+        voucher['voucherType'] = voucher.get('voucherType') or get_voucher_type(voucher.get('claimType', 3))
+        voucher['voucher_description'] = voucher.get('voucher_description') or get_voucher_description(voucher.get('claimType', 3))
         
         return jsonify({
             'status': 'success',
@@ -694,8 +778,8 @@ def redeem_voucher():
     """
     try:
         data = request.get_json()
-        voucher_code = data.get('voucher_code') or data.get('voucherCode')
-        user_address = data.get('user_address') or data.get('userAddress')
+        voucher_code = get_json_field(data, 'voucher_code', 'voucherCode')
+        user_address = get_json_field(data, 'user_address', 'userAddress')
         
         if not voucher_code or not user_address:
             return jsonify({'status': 'error', 'message': 'Voucher code and user address required'}), 400
@@ -714,16 +798,27 @@ def redeem_voucher():
                 'message': f'Voucher is {voucher["status"]}, cannot be redeemed'
             }), 400
         
-        # Update voucher status to redeemed
+        expires_at = voucher.get('expiresAt')
+        if expires_at:
+            if isinstance(expires_at, str):
+                expires_at = datetime.datetime.fromisoformat(expires_at)
+            if expires_at < datetime.datetime.utcnow():
+                db.vouchers.update_one(
+                    {'voucherCode': voucher_code.upper()},
+                    {'$set': {'status': 'expired'}}
+                )
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Voucher has expired and cannot be redeemed'
+                }), 400
+
         db.vouchers.update_one(
             {'voucherCode': voucher_code.upper()},
-            {
-                '$set': {
-                    'status': 'redeemed',
-                    'redeemedAt': __import__('datetime').datetime.utcnow(),
-                    'redeemedByAddress': user_address.lower()
-                }
-            }
+            {'$set': {
+                'status': 'redeemed',
+                'redeemedAt': __import__('datetime').datetime.utcnow(),
+                'redeemedByAddress': user_address.lower()
+            }}
         )
         
         return jsonify({

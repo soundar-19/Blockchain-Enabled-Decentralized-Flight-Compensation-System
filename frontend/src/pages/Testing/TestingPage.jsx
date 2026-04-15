@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   FlaskConical, Loader, CheckCircle, XCircle, Clock, DollarSign,
-  Plane, RefreshCw, ExternalLink, AlertCircle, User, Wallet
+  Plane, RefreshCw, ExternalLink, AlertCircle, User, Wallet,
+  Gift, ArrowRight
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -35,6 +36,10 @@ const TestingPage = ({ account }) => {
   const [walletAddress, setWalletAddress] = useState('');
   const [walletResult, setWalletResult] = useState(null);
   const [checkingWallet, setCheckingWallet] = useState(false);
+
+  const [voucherCode, setVoucherCode] = useState('');
+  const [voucherResult, setVoucherResult] = useState(null);
+  const [voucherLoading, setVoucherLoading] = useState(false);
 
   useEffect(() => {
     console.log('🧪 TestingPage loaded, account:', account);
@@ -172,6 +177,57 @@ const TestingPage = ({ account }) => {
     }
   };
 
+  const handleVerifyVoucher = async () => {
+    if (!voucherCode.trim()) return;
+    setVoucherLoading(true);
+    setVoucherResult(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/blockchain/vouchers/verify/${voucherCode.trim()}`);
+      const data = await res.json();
+      if (res.ok) {
+        setVoucherResult({ success: true, data });
+      } else {
+        setVoucherResult({ success: false, error: data.message || data.error || 'Voucher verification failed' });
+      }
+    } catch (err) {
+      setVoucherResult({ success: false, error: err.message });
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
+  const handleRedeemVoucher = async () => {
+    if (!voucherCode.trim()) return;
+    setVoucherLoading(true);
+    setVoucherResult(null);
+    try {
+      const userAddress = account?.address || walletAddress.trim();
+      if (!userAddress) {
+        setVoucherResult({ success: false, error: 'User wallet address is required to redeem vouchers.' });
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/api/blockchain/vouchers/redeem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          voucher_code: voucherCode.trim(),
+          user_address: userAddress
+        })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setVoucherResult({ success: true, data });
+      } else {
+        setVoucherResult({ success: false, error: data.message || data.error || 'Voucher redemption failed' });
+      }
+    } catch (err) {
+      setVoucherResult({ success: false, error: err.message });
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
   const getCompensationBadge = (booking) => {
     const eth = booking.compensation?.eth_amount || 0;
     const usd = booking.compensation?.usd_value || 0;
@@ -213,10 +269,10 @@ const TestingPage = ({ account }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
 
         {/* === UPDATE FLIGHT DELAY === */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-full flex flex-col">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Clock className="w-5 h-5 text-orange-600" />
             Update Flight Delay
@@ -228,109 +284,112 @@ const TestingPage = ({ account }) => {
               <p className="text-sm text-gray-500 mt-2">Loading bookings...</p>
             </div>
           ) : (
-            <>
-              {/* Booking selector */}
-              <div className="space-y-2 mb-4 max-h-56 overflow-y-auto pr-1">
-                {allBookings.length === 0 ? (
-                  <p className="text-center text-gray-500 py-4">No bookings found. Book a flight first.</p>
-                ) : allBookings.map(booking => (
-                  <div
-                    key={booking._id}
-                    onClick={() => { setSelectedBooking(booking); setDelayInput(String(booking.delay_minutes || 0)); }}
-                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-sm ${
-                      selectedBooking?._id === booking._id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <span className="font-bold text-gray-900">{booking.flight_number}</span>
-                        <span className="text-gray-500 ml-2">{booking.departure_city} → {booking.arrival_city}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {getCompensationBadge(booking)}
-                        {booking.compensation_claimed && (
-                          <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Claimed ✓</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-4 mt-1 text-xs text-gray-500">
-                      <span>Delay: <strong>{booking.delay_minutes} min</strong></span>
-                      <span>Status: <strong>{booking.status}</strong></span>
-                      {booking.user && booking.user[0] && (
-                        <span>User: <strong>{booking.user[0].name || booking.user[0].email}</strong></span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {selectedBooking && (
-                <div className="border-t border-gray-100 pt-4 space-y-3">
-                  <p className="text-sm font-semibold text-gray-700">
-                    Selected: <span className="text-blue-600">{selectedBooking.flight_number}</span>
-                  </p>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 block mb-1">Delay (minutes)</label>
-                      <input
-                        type="number"
-                        value={delayInput}
-                        onChange={e => setDelayInput(e.target.value)}
-                        placeholder="e.g. 240"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                      />
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {[0, 120, 180, 240, 1440].map(d => (
-                          <button key={d} onClick={() => setDelayInput(String(d))}
-                            className={`text-xs px-2 py-0.5 rounded ${delayInput === String(d) ? 'bg-orange-500 text-white' : 'bg-gray-100 hover:bg-orange-100'}`}>
-                            {d}m
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-600 block mb-1">Status</label>
-                      <select
-                        value={statusInput}
-                        onChange={e => setStatusInput(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            <div className="flex flex-col h-full min-h-0">
+              <div className="flex-1 min-h-0">
+                <div className="space-y-2 mb-4 min-h-0">
+                  <div className="space-y-2 overflow-y-auto min-h-0 pr-1">
+                    {allBookings.length === 0 ? (
+                      <p className="text-center text-gray-500 py-4">No bookings found. Book a flight first.</p>
+                    ) : allBookings.map(booking => (
+                      <div
+                        key={booking._id}
+                        onClick={() => { setSelectedBooking(booking); setDelayInput(String(booking.delay_minutes || 0)); }}
+                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-sm ${
+                          selectedBooking?._id === booking._id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
                       >
-                        <option value="completed">Completed</option>
-                        <option value="delayed">Delayed</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="diverted">Diverted</option>
-                      </select>
-                    </div>
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="font-bold text-gray-900">{booking.flight_number}</span>
+                            <span className="text-gray-500 ml-2">{booking.departure_city} → {booking.arrival_city}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {getCompensationBadge(booking)}
+                            {booking.compensation_claimed && (
+                              <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">Claimed ✓</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-4 mt-1 text-xs text-gray-500">
+                          <span>Delay: <strong>{booking.delay_minutes} min</strong></span>
+                          <span>Status: <strong>{booking.status}</strong></span>
+                          {booking.user && booking.user[0] && (
+                            <span>User: <strong>{booking.user[0].name || booking.user[0].email}</strong></span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-
-                  {/* Preview compensation */}
-                  {delayInput !== '' && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
-                      <p className="font-semibold text-amber-800">
-                        💡 Estimated Compensation:
-                        {' '}
-                        {parseInt(delayInput) >= 1440 ? '0.05 ETH (~$100)' :
-                         parseInt(delayInput) >= 240 ? '0.02 ETH (~$40)' :
-                         parseInt(delayInput) >= 180 ? '0.015 ETH (~$30)' :
-                         parseInt(delayInput) >= 120 ? '0.01 ETH (~$20)' :
-                         '0 ETH (< 2 hrs)'}
-                        {statusInput === 'cancelled' ? ' / 0.05 ETH (~$100) cancelled' : ''}
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handleUpdateDelay}
-                    disabled={updating || delayInput === ''}
-                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
-                  >
-                    {updating ? <><Loader className="w-4 h-4 animate-spin" /> Updating...</> : <><Clock className="w-4 h-4" /> Update Delay</>}
-                  </button>
                 </div>
-              )}
+
+                {selectedBooking && (
+                  <div className="border-t border-gray-100 pt-4 space-y-3">
+                    <p className="text-sm font-semibold text-gray-700">
+                      Selected: <span className="text-blue-600">{selectedBooking.flight_number}</span>
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Delay (minutes)</label>
+                        <input
+                          type="number"
+                          value={delayInput}
+                          onChange={e => setDelayInput(e.target.value)}
+                          placeholder="e.g. 240"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        />
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {[0, 120, 180, 240, 1440].map(d => (
+                            <button key={d} onClick={() => setDelayInput(String(d))}
+                              className={`text-xs px-2 py-0.5 rounded ${delayInput === String(d) ? 'bg-orange-500 text-white' : 'bg-gray-100 hover:bg-orange-100'}`}>
+                              {d}m
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Status</label>
+                        <select
+                          value={statusInput}
+                          onChange={e => setStatusInput(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                        >
+                          <option value="completed">Completed</option>
+                          <option value="delayed">Delayed</option>
+                          <option value="cancelled">Cancelled</option>
+                          <option value="diverted">Diverted</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Preview compensation */}
+                    {delayInput !== '' && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
+                        <p className="font-semibold text-amber-800">
+                          💡 Estimated Compensation:
+                          {' '}
+                          {parseInt(delayInput) >= 1440 ? '0.05 ETH (~$100)' :
+                           parseInt(delayInput) >= 240 ? '0.02 ETH (~$40)' :
+                           parseInt(delayInput) >= 180 ? '0.015 ETH (~$30)' :
+                           parseInt(delayInput) >= 120 ? '0.01 ETH (~$20)' :
+                           '0 ETH (< 2 hrs)'}
+                          {statusInput === 'cancelled' ? ' / 0.05 ETH (~$100) cancelled' : ''}
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleUpdateDelay}
+                      disabled={updating || delayInput === ''}
+                      className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+                    >
+                      {updating ? <><Loader className="w-4 h-4 animate-spin" /> Updating...</> : <><Clock className="w-4 h-4" /> Update Delay</>}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {updateResult && (
                 <div className={`mt-4 p-3 rounded-lg text-sm ${updateResult.type === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
@@ -353,7 +412,7 @@ const TestingPage = ({ account }) => {
                   )}
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 
@@ -410,6 +469,60 @@ const TestingPage = ({ account }) => {
                   <p className="text-yellow-700 font-semibold">⏳ Transaction pending...</p>
                 ) : (
                   <p className="text-red-700"><XCircle className="w-4 h-4 inline mr-1" />{txResult.message || txResult.error}</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* === VOUCHER VERIFICATION & STATUS === */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Gift className="w-5 h-5 text-sky-600" />
+              Voucher Dev Tools
+            </h2>
+
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={voucherCode}
+                onChange={e => setVoucherCode(e.target.value)}
+                placeholder="Enter voucher code"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={handleVerifyVoucher}
+                  disabled={voucherLoading || !voucherCode.trim()}
+                  className="w-full bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
+                >
+                  {voucherLoading ? <><Loader className="w-4 h-4 animate-spin" /> Verifying...</> : <><CheckCircle className="w-4 h-4" /> Verify</>}
+                </button>
+                <button
+                  onClick={handleRedeemVoucher}
+                  disabled={voucherLoading || !voucherCode.trim()}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2"
+                >
+                  {voucherLoading ? <><Loader className="w-4 h-4 animate-spin" /> Processing...</> : <><ArrowRight className="w-4 h-4" /> Mark Redeemed</>}
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-500">Verification and redemption are available here for developer testing only.</p>
+            </div>
+
+            {voucherResult && (
+              <div className={`mt-4 p-4 rounded-lg text-sm ${voucherResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                {voucherResult.success ? (
+                  <>
+                    <p className="font-bold text-green-800 mb-2">Voucher Result</p>
+                    <p className="text-slate-700">Status: <strong>{voucherResult.data.voucher?.status || voucherResult.data.status}</strong></p>
+                    {voucherResult.data.voucher?.voucherCode && <p>Code: <strong>{voucherResult.data.voucher.voucherCode}</strong></p>}
+                    {voucherResult.data.voucher?.voucher_description && <p>Description: {voucherResult.data.voucher.voucher_description}</p>}
+                    {voucherResult.data.voucher?.redeemedAt && <p>Redeemed At: {voucherResult.data.voucher.redeemedAt}</p>}
+                    {voucherResult.data.message && <p className="mt-2 text-slate-700">{voucherResult.data.message}</p>}
+                  </>
+                ) : (
+                  <p className="text-red-700"><XCircle className="w-4 h-4 inline mr-1" />{voucherResult.error}</p>
                 )}
               </div>
             )}

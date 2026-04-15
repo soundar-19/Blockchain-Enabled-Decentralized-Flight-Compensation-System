@@ -82,26 +82,27 @@ const CompensatePageSimple = ({ account, setDialog, onAccountUpdate }) => {
           console.error('❌ Missing delay_minutes in booking');
           throw new Error('Booking missing delay_minutes');
         }
-        
+
+        const bookingClaimType = selectedBooking.claimType ?? selectedBooking.compensation?.claimType ?? 0;
+
         // Use blockchain service for voucher claim
         const result = await blockchainService.fileVoucherClaim(
           displayAccount.address,
           selectedBooking.flight_number,
           selectedBooking.delay_minutes,
-          0, // Default to food (0) - could be extended
-          1  // route_id
+          bookingClaimType,
+          1,  // route_id
+          selectedBooking._id
         );
 
         if (result.success) {
           console.log('✅ Voucher claim successful:', result);
           const voucherCode = result.voucherCode || 'Generated';
-          const ethAmount = selectedBooking.compensation?.eth_amount || 0;
-          const usdValue = selectedBooking.compensation?.usd_value || 0;
           
           setDialog({
             isOpen: true,
             title: 'Voucher Claim Success! 🎫',
-            message: `Voucher Code: ${voucherCode}\n\nAmount: ${ethAmount} ETH (~$${usdValue})\nType: ${selectedBooking.compensation.description}\n\n✅ Transaction: ${result.transactionHash?.substring(0, 20)}...\n\n📋 Your voucher has been created and ETH transferred to the secure voucher wallet (0x32C532f9b48334c3F3f4410494163ec5Af109c62)`,
+            message: `Voucher Code: ${voucherCode}\n\nType: ${selectedBooking.compensation.description}\nValid for 30 days.\n\n✅ Transaction: ${result.transactionHash?.substring(0, 20)}...\n\n📋 Your voucher is now stored in the secure voucher wallet and cannot be claimed again for this booking.`,
             type: 'success'
           });
           setSelectedBooking(null);
@@ -352,7 +353,14 @@ const CompensatePageSimple = ({ account, setDialog, onAccountUpdate }) => {
                         </div>
                         <div className="text-right">
                           <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">✓ Claimed</span>
-                          <p className="text-xs text-green-600 font-bold mt-1">{booking.compensation?.eth_amount} ETH (~${booking.compensation?.usd_value})</p>
+                          {booking.claim_method === 'voucher' ? (
+                            <>
+                              <p className="text-xs text-green-600 font-bold mt-1">Voucher claimed</p>
+                              {booking.voucher_code && <p className="text-xs text-slate-500 mt-1">Code: {booking.voucher_code}</p>}
+                            </>
+                          ) : (
+                            <p className="text-xs text-green-600 font-bold mt-1">{booking.compensation?.eth_amount} ETH (~${booking.compensation?.usd_value})</p>
+                          )}
                         </div>
                       </div>
                       {booking.tx_hash && (
@@ -383,35 +391,35 @@ const CompensatePageSimple = ({ account, setDialog, onAccountUpdate }) => {
 
       {/* Compensation Rules */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md border border-blue-200 p-6">
-        <h2 className="text-xl font-bold text-blue-900 mb-4">EU261 Compensation Rules</h2>
+        <h2 className="text-xl font-bold text-blue-900 mb-4">Voucher Service Rules</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-lg border-l-4 border-yellow-400">
             <Coffee className="w-8 h-8 text-yellow-500 mb-2" />
             <h3 className="font-bold text-gray-900">Delay 2 hrs</h3>
-            <p className="text-sm text-gray-600 mt-1">Free refreshments</p>
-            <p className="text-lg font-bold text-green-600 mt-2">0.01 ETH</p>
-            <p className="text-xs text-gray-500">~$20</p>
+            <p className="text-sm text-gray-600 mt-1">Meal voucher for airport dining</p>
+            <p className="text-lg font-bold text-green-600 mt-2">Service Voucher</p>
+            <p className="text-xs text-gray-500">Use at restaurants and cafes</p>
           </div>
           <div className="bg-white p-4 rounded-lg border-l-4 border-orange-500">
             <Coffee className="w-8 h-8 text-orange-600 mb-2" />
             <h3 className="font-bold text-gray-900">Delay 3 hrs</h3>
-            <p className="text-sm text-gray-600 mt-1">Meals provided</p>
-            <p className="text-lg font-bold text-green-600 mt-2">0.015 ETH</p>
-            <p className="text-xs text-gray-500">~$30</p>
+            <p className="text-sm text-gray-600 mt-1">Refreshment voucher with snacks</p>
+            <p className="text-lg font-bold text-green-600 mt-2">Service Voucher</p>
+            <p className="text-xs text-gray-500">Valid at partner lounges</p>
           </div>
           <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
             <Hotel className="w-8 h-8 text-blue-600 mb-2" />
             <h3 className="font-bold text-gray-900">Delay 4 hrs</h3>
-            <p className="text-sm text-gray-600 mt-1">Hotel + meals</p>
-            <p className="text-lg font-bold text-green-600 mt-2">0.02 ETH</p>
-            <p className="text-xs text-gray-500">~$40</p>
+            <p className="text-sm text-gray-600 mt-1">Hotel + lounge voucher</p>
+            <p className="text-lg font-bold text-green-600 mt-2">Service Voucher</p>
+            <p className="text-xs text-gray-500">Overnight accommodation support</p>
           </div>
           <div className="bg-white p-4 rounded-lg border-l-4 border-red-500">
             <AlertCircle className="w-8 h-8 text-red-600 mb-2" />
             <h3 className="font-bold text-gray-900">Delay 24+ hrs</h3>
-            <p className="text-sm text-gray-600 mt-1">Full hotel + refund</p>
-            <p className="text-lg font-bold text-green-600 mt-2">0.05 ETH</p>
-            <p className="text-xs text-gray-500">~$100</p>
+            <p className="text-sm text-gray-600 mt-1">Premium support voucher</p>
+            <p className="text-lg font-bold text-green-600 mt-2">Service Voucher</p>
+            <p className="text-xs text-gray-500">Includes hotel, transport, and meals</p>
           </div>
         </div>
       </div>
@@ -427,7 +435,7 @@ const CompensatePageSimple = ({ account, setDialog, onAccountUpdate }) => {
               <div><p className="text-gray-500">Flight</p><p className="font-bold">{selectedBooking.flight_number}</p></div>
               <div><p className="text-gray-500">Delay</p><p className="font-bold">{selectedBooking.delay_minutes} min</p></div>
               <div><p className="text-gray-500">Status</p><p className="font-bold">{selectedBooking.status}</p></div>
-                <div><p className="text-gray-500">Compensation</p><p className="font-bold text-green-600">{selectedBooking.compensation?.eth_amount} ETH (~${selectedBooking.compensation?.usd_value})</p></div>
+                <div><p className="text-gray-500">Compensation</p><p className="font-bold text-green-600">{claimMethod === 'voucher' ? selectedBooking.compensation?.description : `${selectedBooking.compensation?.eth_amount} ETH (~$${selectedBooking.compensation?.usd_value})`}</p></div>
             </div>
           </div>
 
@@ -480,6 +488,8 @@ const CompensatePageSimple = ({ account, setDialog, onAccountUpdate }) => {
           >
             {submitting ? (
               <><Loader className="w-5 h-5 animate-spin" /> Processing on blockchain...</>
+            ) : claimMethod === 'voucher' ? (
+              <><CheckCircle className="w-5 h-5" /> Claim Voucher</>
             ) : (
               <><CheckCircle className="w-5 h-5" /> Claim {selectedBooking.compensation?.eth_amount} ETH (~${selectedBooking.compensation?.usd_value})</>
             )}

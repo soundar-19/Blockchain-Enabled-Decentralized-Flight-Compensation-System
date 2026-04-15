@@ -1,9 +1,18 @@
 #!/usr/bin/env python3
 # backend/api/app.py
+import os
+import sys
+from pathlib import Path
 from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
-import os
 from dotenv import load_dotenv
+
+# Allow running this file directly with python backend/api/app.py
+if __package__ is None or __package__ == '':
+    package_root = Path(__file__).resolve().parent.parent
+    if str(package_root) not in sys.path:
+        sys.path.insert(0, str(package_root))
+    __package__ = 'api'
 
 load_dotenv()
 

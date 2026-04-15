@@ -635,14 +635,15 @@ class BlockchainDataService {
    * File a compensation claim as a voucher
    * Transfers compensation amount to voucher wallet and creates voucher record
    */
-  async fileVoucherClaim(userAddress, flightNumber, delayMinutes, claimType, routeId = 1) {
+  async fileVoucherClaim(userAddress, flightNumber, delayMinutes, claimType, routeId = 1, bookingId = null) {
     try {
       console.log('🔵 Filing voucher claim...', {
         userAddress,
         flightNumber,
         delayMinutes,
         claimType,
-        routeId
+        routeId,
+        bookingId
       });
 
       const payload = {
@@ -650,7 +651,8 @@ class BlockchainDataService {
         flight_number: flightNumber,
         delay_minutes: parseInt(delayMinutes),
         claim_type: parseInt(claimType),
-        route_id: parseInt(routeId)
+        route_id: parseInt(routeId),
+        ...(bookingId ? { booking_id: bookingId } : {})
       };
       
       console.log('📤 Payload to send:', JSON.stringify(payload));

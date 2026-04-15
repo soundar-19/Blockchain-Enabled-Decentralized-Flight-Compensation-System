@@ -460,26 +460,27 @@ class BlockchainService:
             print(f"✓ Voucher Wallet (checksum): {voucher_checksum}")
             print(f"✓ Deployer: {deployer}")
             
-            # Convert ETH to wei
+            # Convert token amount to FLY token decimals (18 decimals)
             amount_wei = BlockchainConfig.to_wei(amount_eth, 'ether')
-            print(f"✓ Amount in wei: {amount_wei}")
-            
-            # Build transaction to transfer ETH to voucher wallet
-            nonce = w3.eth.get_transaction_count(deployer)
-            gas_price = w3.eth.gas_price
-            
-            print(f"✓ Nonce: {nonce}")
-            print(f"✓ Gas Price: {gas_price}")
-            
-            tx_data = {
+            print(f"✓ Token amount in wei: {amount_wei}")
+
+            fly_token_contract = self.contract_manager.get_contract('FlightToken')
+            pending_nonce = w3.eth.get_transaction_count(deployer, 'pending')
+            current_gas_price = w3.eth.gas_price or 0
+            print(f"✓ Using nonce: {pending_nonce}, gasPrice: {current_gas_price}")
+
+            tx_data = fly_token_contract.functions.transfer(
+                voucher_checksum,
+                int(amount_wei)
+            ).build_transaction({
                 'from': deployer,
-                'to': voucher_checksum,
-                'value': int(amount_wei),
-                'nonce': nonce,
-                'gas': 21000,  # Standard ETH transfer
-                'gasPrice': gas_price,
+                'nonce': pending_nonce,
+                'gas': 100000,
+                'gasPrice': current_gas_price,
                 'chainId': w3.eth.chain_id
-            }
+            })
+
+            print(f"✓ Token transfer transaction built")
             
             print(f"✓ Transaction data built")
             

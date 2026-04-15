@@ -27,6 +27,8 @@ export const isValidEthereumAddress = (address) => {
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
+import { keccak256 } from 'js-sha3';
+
 /**
  * Convert address to checksum format
  * @param {string} address - Address to convert
@@ -37,7 +39,7 @@ export const toChecksumAddress = (address) => {
     return address;
   }
   
-  const hash = require('js-sha3').keccak256(address.slice(2).toLowerCase());
+  const hash = keccak256(address.slice(2).toLowerCase());
   let checksumAddress = '0x';
   
   for (let i = 0; i < 40; i++) {

@@ -13,13 +13,13 @@ REM Start Backend in a new window, prefer .venv then venv then system Python
 echo [Backend] Checking for virtual environment...
 if exist "%SCRIPT_DIR%backend\.venv\Scripts\activate.bat" (
     echo Found backend\.venv - activating and starting backend
-    start "SkyGuard Backend" cmd /k "cd /d "%SCRIPT_DIR%backend" && .venv\Scripts\activate.bat && python -m api"
+    start "SkyGuard Backend" cmd /k "cd /d "%SCRIPT_DIR%backend" && .venv\Scripts\activate.bat && python run.py"
 ) else if exist "%SCRIPT_DIR%backend\venv\Scripts\activate.bat" (
     echo Found backend\venv - activating and starting backend
-    start "SkyGuard Backend" cmd /k "cd /d "%SCRIPT_DIR%backend" && venv\Scripts\activate.bat && python -m api"
+    start "SkyGuard Backend" cmd /k "cd /d "%SCRIPT_DIR%backend" && venv\Scripts\activate.bat && python run.py"
 ) else (
     echo No virtualenv found - starting backend with system Python
-    start "SkyGuard Backend" cmd /k "cd /d "%SCRIPT_DIR%backend" && python -m api"
+    start "SkyGuard Backend" cmd /k "cd /d "%SCRIPT_DIR%backend" && python run.py"
 )
 
 REM Give backend a moment to initialize
